@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pgd version="1" pg-version="18" default-schema="public">
+  <project name="ezoffer">
+    <settings>
+      <naming convention="camelCase"></naming>
+      <defaults nullable="true" on-delete="restrict" on-update="restrict"></defaults>
+    </settings>
+  </project>
+  <roles></roles>
+  <tablespaces></tablespaces>
+  <extensions></extensions>
+  <sequences></sequences>
+  <schema name="public">
+    <table name="comments">
+      <column name="commentId" type="bigserial" nullable="false"></column>
+      <column name="likesCnt" type="bigint" nullable="false"></column>
+      <column name="content" type="text" nullable="false"></column>
+      <column name="interviewId" type="bigint"></column>
+      <column name="questionId" type="bigint"></column>
+      <column name="testAssignmentId" type="bigint"></column>
+      <column name="taskId" type="bigint"></column>
+      <pk name="pk_comments">
+        <column name="commentId"></column>
+      </pk>
+      <fk name="fk_comments_interviewId" to-table="interviews" on-delete="restrict" on-update="restrict">
+        <column name="interviewId" references="interviewId"></column>
+      </fk>
+      <fk name="fk_comments_questionId" to-table="questions" on-delete="restrict" on-update="restrict">
+        <column name="questionId" references="questionId"></column>
+      </fk>
+      <fk name="fk_comments_taskId" to-table="tasks" on-delete="restrict" on-update="restrict">
+        <column name="taskId" references="taskId"></column>
+      </fk>
+      <fk name="fk_comments_testAssignmentId" to-table="testAssignments" on-delete="restrict" on-update="restrict">
+        <column name="testAssignmentId" references="testAssignmentId"></column>
+      </fk>
+      <check name="chk_one_entity"><![CDATA[((("interviewId" IS NOT NULL::int + "questionId" IS NOT NULL::int) + "testAssignmentId" IS NOT NULL::int) + "taskId" IS NOT NULL::int) = 1]]></check>
+    </table>
+    <table name="companies">
+      <column name="companyId" type="bigserial" nullable="false"></column>
+      <column name="name" type="varchar" length="255" nullable="false"></column>
+      <pk name="pk_companies">
+        <column name="companyId"></column>
+      </pk>
+      <unique name="">
+        <column name="name"></column>
+      </unique>
+    </table>
+    <table name="interviews">
+      <column name="interviewId" type="bigserial" nullable="false"></column>
+      <column name="slug" type="varchar" length="255" nullable="false"></column>
+      <column name="title" type="varchar" length="255" nullable="false"></column>
+      <column name="grades" type="varchar[]" nullable="false"></column>
+      <column name="type" type="varchar[]" nullable="false"></column>
+      <column name="videoLink" type="varchar" length="255" nullable="false"></column>
+      <column name="isReal" type="boolean" nullable="false"></column>
+      <column name="publishedDate" type="date" nullable="false"></column>
+      <column name="createdAt" type="timestamptz" nullable="false"></column>
+      <column name="companyId" type="bigint" nullable="false"></column>
+      <pk name="pk_interviews">
+        <column name="interviewId"></column>
+      </pk>
+      <fk name="fk_interviews_companyId" to-table="companies" on-delete="restrict" on-update="restrict">
+        <column name="companyId" references="companyId"></column>
+      </fk>
+      <unique name="">
+        <column name="slug"></column>
+      </unique>
+    </table>
+    <table name="questions">
+      <column name="questionId" type="bigserial" nullable="false"></column>
+      <column name="slug" type="varchar" length="255" nullable="false"></column>
+      <column name="frequency" type="real" nullable="false"></column>
+      <column name="grades" type="varchar[]" nullable="false"></column>
+      <column name="content" type="text" nullable="false"></column>
+      <column name="createdAt" type="timestamptz" nullable="false"></column>
+      <pk name="pk_questions">
+        <column name="questionId"></column>
+      </pk>
+      <unique name="">
+        <column name="slug"></column>
+      </unique>
+    </table>
+    <table name="skills">
+      <column name="skillId" type="bigserial" nullable="false"></column>
+      <column name="name" type="varchar" length="255" nullable="false"></column>
+      <pk name="pk_skills">
+        <column name="skillId"></column>
+      </pk>
+    </table>
+    <table name="tasks">
+      <column name="taskId" type="bigserial" nullable="false"></column>
+      <column name="slug" type="varchar" length="255" nullable="false"></column>
+      <column name="title" type="varchar" length="255" nullable="false"></column>
+      <column name="grades" type="varchar[]" nullable="false"></column>
+      <column name="type" type="varchar" length="255" nullable="false"></column>
+      <column name="content" type="text" nullable="false"></column>
+      <column name="createdAt" type="timestamptz" nullable="false"></column>
+      <pk name="pk_tasks">
+        <column name="taskId"></column>
+      </pk>
+      <unique name="">
+        <column name="slug"></column>
+      </unique>
+    </table>
+    <table name="tasksCompanies">
+      <column name="taskId" type="bigint" nullable="false"></column>
+      <column name="companyId" type="bigint" nullable="false"></column>
+      <pk name="pk_tasksCompanies">
+        <column name="taskId"></column>
+        <column name="companyId"></column>
+      </pk>
+      <fk name="fk_tasksCompanies_companyId" to-table="companies" on-delete="restrict" on-update="restrict">
+        <column name="companyId" references="companyId"></column>
+      </fk>
+      <fk name="fk_tasksCompanies_taskId" to-table="tasks" on-delete="restrict" on-update="restrict">
+        <column name="taskId" references="taskId"></column>
+      </fk>
+    </table>
+    <table name="testAssignments">
+      <column name="testAssignmentId" type="bigserial" nullable="false"></column>
+      <column name="slug" type="varchar" length="255" nullable="false"></column>
+      <column name="title" type="varchar" length="255" nullable="false"></column>
+      <column name="grades" type="varchar[]" nullable="false"></column>
+      <column name="content" type="text" nullable="false"></column>
+      <column name="publishedDate" type="date" nullable="false"></column>
+      <column name="createdAt" type="timestamptz" nullable="false"></column>
+      <pk name="pk_testAssignments">
+        <column name="testAssignmentId"></column>
+      </pk>
+      <unique name="">
+        <column name="slug"></column>
+      </unique>
+    </table>
+    <table name="testAssignmentsCompanies">
+      <column name="testAssignmentId" type="bigint" nullable="false"></column>
+      <column name="companyId" type="bigint" nullable="false"></column>
+      <pk name="pk_testAssignmentsCompanies">
+        <column name="testAssignmentId"></column>
+        <column name="companyId"></column>
+      </pk>
+      <fk name="fk_testAssignmentsCompanies_companyId" to-table="companies" on-delete="restrict" on-update="restrict">
+        <column name="companyId" references="companyId"></column>
+      </fk>
+      <fk name="fk_testAssignmentsCompanies_testAssignmentId" to-table="testAssignments" on-delete="restrict" on-update="restrict">
+        <column name="testAssignmentId" references="testAssignmentId"></column>
+      </fk>
+    </table>
+    <table name="testAssignmentsSkills">
+      <column name="testAssignmentId" type="bigint" nullable="false"></column>
+      <column name="skillId" type="bigint" nullable="false"></column>
+      <pk name="pk_testAssignmentsSkills">
+        <column name="testAssignmentId"></column>
+        <column name="skillId"></column>
+      </pk>
+      <fk name="fk_testAssignmentsSkills_skillId" to-table="skills" on-delete="restrict" on-update="restrict">
+        <column name="skillId" references="skillId"></column>
+      </fk>
+      <fk name="fk_testAssignmentsSkills_testAssignmentId" to-table="testAssignments" on-delete="restrict" on-update="restrict">
+        <column name="testAssignmentId" references="testAssignmentId"></column>
+      </fk>
+    </table>
+    <table name="users">
+      <column name="userId" type="bigserial" nullable="false"></column>
+      <pk name="pk_users">
+        <column name="userId"></column>
+      </pk>
+    </table>
+    <index name="ix_comments_interviewId" table="comments">
+      <column name="interviewId"></column>
+    </index>
+    <index name="ix_comments_questionId" table="comments">
+      <column name="questionId"></column>
+    </index>
+    <index name="ix_comments_taskId" table="comments">
+      <column name="taskId"></column>
+    </index>
+    <index name="ix_comments_testAssignmentId" table="comments">
+      <column name="testAssignmentId"></column>
+    </index>
+    <index name="ix_interviews_companyId" table="interviews">
+      <column name="companyId"></column>
+    </index>
+    <index name="ix_tasksCompanies_companyId" table="tasksCompanies">
+      <column name="companyId"></column>
+    </index>
+    <index name="ix_tasksCompanies_taskId" table="tasksCompanies">
+      <column name="taskId"></column>
+    </index>
+    <index name="ix_testAssignmentsCompanies_companyId" table="testAssignmentsCompanies">
+      <column name="companyId"></column>
+    </index>
+    <index name="ix_testAssignmentsCompanies_testAssignmentId" table="testAssignmentsCompanies">
+      <column name="testAssignmentId"></column>
+    </index>
+    <index name="ix_testAssignmentsSkills_skillId" table="testAssignmentsSkills">
+      <column name="skillId"></column>
+    </index>
+    <index name="ix_testAssignmentsSkills_testAssignmentId" table="testAssignmentsSkills">
+      <column name="testAssignmentId"></column>
+    </index>
+  </schema>
+  <functions></functions>
+  <triggers></triggers>
+  <rules></rules>
+  <policies></policies>
+  <comments></comments>
+  <layouts>
+    <layout name="Default Diagram" default="true">
+      <entity schema="public" table="comments" x="40" y="40"></entity>
+      <entity schema="public" table="companies" x="420" y="40"></entity>
+      <entity schema="public" table="interviews" x="920" y="-580"></entity>
+      <entity schema="public" table="questions" x="1180" y="40"></entity>
+      <entity schema="public" table="skills" x="1560" y="40"></entity>
+      <entity schema="public" table="tasks" x="40" y="500"></entity>
+      <entity schema="public" table="tasksCompanies" x="420" y="500"></entity>
+      <entity schema="public" table="testAssignments" x="800" y="500"></entity>
+      <entity schema="public" table="testAssignmentsCompanies" x="1180" y="500"></entity>
+      <entity schema="public" table="testAssignmentsSkills" x="1560" y="500"></entity>
+      <entity schema="public" table="users" x="40" y="940"></entity>
+    </layout>
+  </layouts>
+</pgd>
