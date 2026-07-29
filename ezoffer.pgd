@@ -55,13 +55,15 @@
     </table>
     <table name="interviews">
       <column name="interviewId" type="bigint" nullable="false"><identity generated="by default"></identity></column>
+      <column name="sourceId" type="bigint"></column>
       <column name="slug" type="varchar" length="255" nullable="false"></column>
       <column name="title" type="varchar" length="255" nullable="false"></column>
-      <column name="grade" type="varchar" length="20"></column>
-      <column name="type" type="varchar" length="20"></column>
+      <column name="grades" type="varchar[]" nullable="false" default="'{}'"></column>
+      <column name="types" type="varchar[]" nullable="false" default="'{}'"></column>
       <column name="companyId" type="bigint"></column>
       <column name="youtubeUrl" type="text"></column>
       <column name="vfsPath" type="text"></column>
+      <column name="sourceUrl" type="text"></column>
       <column name="isEmbeddable" type="boolean" nullable="false" default="false"></column>
       <column name="isReal" type="boolean" nullable="false" default="true"></column>
       <column name="isVisible" type="boolean" nullable="false" default="true"></column>
@@ -76,12 +78,16 @@
       <unique name="">
         <column name="slug"></column>
       </unique>
-      <check name="chk_interviews_grade"><![CDATA["grade" IS NULL OR "grade" = ANY (ARRAY['junior','middle','senior','lead'])]]></check>
-      <check name="chk_interviews_type"><![CDATA["type" IS NULL OR "type" = ANY (ARRAY['technical','liveCoding','algorithmic','hrScreening','final','systemDesign'])]]></check>
-      <check name="chk_interviews_video"><![CDATA["youtubeUrl" IS NOT NULL OR "vfsPath" IS NOT NULL]]></check>
+      <unique name="">
+        <column name="sourceId"></column>
+      </unique>
+      <check name="chk_interviews_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::varchar[]]]></check>
+      <check name="chk_interviews_types"><![CDATA["types" <@ ARRAY['technical','liveCoding','algorithmic','hrScreening','final','systemDesign']::varchar[]]]></check>
+      <check name="chk_interviews_video"><![CDATA["youtubeUrl" IS NOT NULL OR "vfsPath" IS NOT NULL OR "sourceUrl" IS NOT NULL]]></check>
     </table>
     <table name="questions">
       <column name="questionId" type="bigint" nullable="false"><identity generated="by default"></identity></column>
+      <column name="sourceId" type="bigint" nullable="false"></column>
       <column name="slug" type="varchar" length="255" nullable="false"></column>
       <column name="content" type="text" nullable="false"></column>
       <column name="frequency" type="real"></column>
@@ -91,6 +97,9 @@
       </pk>
       <unique name="">
         <column name="slug"></column>
+      </unique>
+      <unique name="">
+        <column name="sourceId"></column>
       </unique>
       <check name="chk_questions_frequency"><![CDATA["frequency" IS NULL OR ("frequency" >= 0 AND "frequency" <= 100)]]></check>
     </table>
@@ -120,18 +129,24 @@
     </table>
     <table name="tasks">
       <column name="taskId" type="bigint" nullable="false"><identity generated="by default"></identity></column>
+      <column name="sourceId" type="bigint" nullable="false"></column>
       <column name="slug" type="varchar" length="255" nullable="false"></column>
       <column name="title" type="varchar" length="255" nullable="false"></column>
       <column name="grades" type="varchar[]" nullable="false" default="'{}'"></column>
       <column name="type" type="varchar" length="20"></column>
       <column name="content" type="text" nullable="false"></column>
-      <column name="codeSnippet" type="text"></column>
+      <column name="sourceUrl" type="text"></column>
+      <column name="rank" type="integer"></column>
+      <column name="lastDate" type="timestamptz"></column>
       <column name="createdAt" type="timestamptz" nullable="false" default="now()"></column>
       <pk name="pk_tasks">
         <column name="taskId"></column>
       </pk>
       <unique name="">
         <column name="slug"></column>
+      </unique>
+      <unique name="">
+        <column name="sourceId"></column>
       </unique>
       <check name="chk_tasks_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::varchar[]]]></check>
       <check name="chk_tasks_type"><![CDATA["type" IS NULL OR "type" = ANY (ARRAY['liveCoding','algorithms','systemDesign'])]]></check>
@@ -156,6 +171,7 @@
       <column name="title" type="varchar" length="255" nullable="false"></column>
       <column name="grades" type="varchar[]" nullable="false" default="'{}'"></column>
       <column name="content" type="text" nullable="false"></column>
+      <column name="sourceUrl" type="text"></column>
       <column name="publishedDate" type="date"></column>
       <column name="createdAt" type="timestamptz" nullable="false" default="now()"></column>
       <pk name="pk_testAssignments">
@@ -223,11 +239,11 @@
     <index name="ix_interviews_companyId" table="interviews">
       <column name="companyId"></column>
     </index>
-    <index name="ix_interviews_grade" table="interviews">
-      <column name="grade"></column>
+    <index name="ix_interviews_grades" table="interviews" using="gin">
+      <column name="grades"></column>
     </index>
-    <index name="ix_interviews_type" table="interviews">
-      <column name="type"></column>
+    <index name="ix_interviews_types" table="interviews" using="gin">
+      <column name="types"></column>
     </index>
     <index name="ix_questions_frequency" table="questions">
       <column name="frequency" order="desc"></column>
@@ -241,6 +257,9 @@
     </index>
     <index name="ix_tasks_type" table="tasks">
       <column name="type"></column>
+    </index>
+    <index name="ix_tasks_rank" table="tasks">
+      <column name="rank"></column>
     </index>
     <index name="ix_tasksCompanies_companyId" table="tasksCompanies">
       <column name="companyId"></column>
