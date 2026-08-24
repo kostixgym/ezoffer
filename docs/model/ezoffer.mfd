@@ -1,0 +1,14 @@
+<Project xmlns:xsi="" xmlns:xsd="">
+    <Name>ezoffer.mfd</Name>
+    <PackageNames>
+        <string>common</string>
+    </PackageNames>
+    <Languages>
+        <string>ru</string>
+    </Languages>
+    <GoPGVer>10</GoPGVer>
+    <CustomTypes></CustomTypes>
+    <TableMapping>
+        <common>questions,questionsGrades,tasks,tasksCompanies,testAssignments,testAssignmentsCompanies,testAssignmentsSkills,interviews,comments,companies,skills,users&#xA;</common>
+    </TableMapping>
+</Project>
