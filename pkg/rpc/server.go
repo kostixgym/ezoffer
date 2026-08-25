@@ -13,6 +13,7 @@ import (
 var (
 	ErrNotImplemented = zenrpc.NewStringError(http.StatusInternalServerError, "not implemented")
 	ErrInternal       = zenrpc.NewStringError(http.StatusInternalServerError, "internal error")
+	ErrNotFound       = zenrpc.NewStringError(http.StatusNotFound, "not found")
 )
 
 var allowDebugFn = func() zm.AllowDebugFunc {
