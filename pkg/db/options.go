@@ -12,9 +12,10 @@ import (
 	"github.com/go-pg/urlstruct"
 )
 
-// В нашей схеме колонки "statusId" нет — видимость решается через "isVisible"
-// у comments и interviews. Константа и фильтр оставлены только потому, что на
-// них ссылается генерируемый mfd-generator метод CommonRepo.WithEnabledOnly.
+// StatusEnabled is kept for generated code only. Our schema has no "statusId"
+// column: visibility is handled by "isVisible" on comments and interviews.
+// mfd-generator unconditionally emits CommonRepo.WithEnabledOnly, which refers
+// to StatusEnabledFilter below.
 const StatusEnabled = 1
 
 var StatusEnabledFilter = Filter{Field: "statusId", Value: []int{StatusEnabled}, SearchType: SearchTypeArray}
@@ -71,7 +72,6 @@ func WithColumns(cols ...string) OpFunc {
 		}
 	}
 }
-
 
 // WithoutColumns is a function that excludes user specific columns from a query.
 func WithoutColumns(cols ...string) OpFunc {
