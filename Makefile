@@ -56,8 +56,7 @@ run:
 	@go run $(GOFLAGS) $(MAIN) -config=cfg/local.toml -dev
 
 generate:
-	#@go generate ./pkg/rpc
-	@go generate ./pkg/vt
+	@go generate ./pkg/rpc
 
 test:
 	@echo "Running tests"
