@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"ezoffer/pkg/db"
+	"ezoffer/pkg/ezoffer"
 
 	"github.com/vmkteam/embedlog"
 	zm "github.com/vmkteam/zenrpc-middleware"
@@ -13,6 +14,7 @@ import (
 var (
 	ErrNotImplemented = zenrpc.NewStringError(http.StatusInternalServerError, "not implemented")
 	ErrInternal       = zenrpc.NewStringError(http.StatusInternalServerError, "internal error")
+	ErrNotFound       = zenrpc.NewStringError(http.StatusNotFound, "not found")
 )
 
 var allowDebugFn = func() zm.AllowDebugFunc {
@@ -45,9 +47,11 @@ func New(dbo db.DB, logger embedlog.Logger, isDevel bool) *zenrpc.Server {
 		zm.WithErrorSLog(logger.Print, zm.DefaultServerName, nil),
 	)
 
+	m := ezoffer.NewManager(dbo, logger)
+
 	// services
 	rpc.RegisterAll(map[string]zenrpc.Invoker{
-		// "sample": NewSampleService(db, logger),
+		"question": NewQuestionService(m, logger),
 	})
 
 	return rpc
