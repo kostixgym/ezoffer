@@ -46,10 +46,14 @@ func (m *Manager) questionsAll(ctx context.Context, p QuestionListParams) ([]Que
 	}
 
 	pager := db.NewPager(p.Page, p.PageSize)
-	sort := db.WithSort(db.SortField{
-		Column:    db.Columns.Question.Frequency,
-		Direction: db.SortDescNullsLast,
-	})
+
+	// Chance is far from unique — 2409 of 2425 questions share it with someone,
+	// and 1833 sit on a single value. Without a unique tiebreaker the order
+	// inside a group is undefined, and rows drift between pages.
+	sort := db.WithSort(
+		db.SortField{Column: db.Columns.Question.Frequency, Direction: db.SortDescNullsLast},
+		db.SortField{Column: db.Columns.Question.ID, Direction: db.SortAsc},
+	)
 
 	questions, err := m.repo.QuestionsByFilters(ctx, search, pager, sort)
 	if err != nil {
@@ -81,10 +85,10 @@ func (m *Manager) questionsByGrade(ctx context.Context, p QuestionListParams, gr
 
 	listOps := append([]db.OpFunc{
 		m.repo.FullQuestionsGrade(),
-		db.WithSort(db.SortField{
-			Column:    db.Columns.QuestionsGrade.Frequency,
-			Direction: db.SortDescNullsLast,
-		}),
+		db.WithSort(
+			db.SortField{Column: db.Columns.QuestionsGrade.Frequency, Direction: db.SortDescNullsLast},
+			db.SortField{Column: db.Columns.QuestionsGrade.QuestionID, Direction: db.SortAsc},
+		),
 	}, ops...)
 
 	grades, err := m.repo.QuestionsGradesByFilters(ctx, search, pager, listOps...)
