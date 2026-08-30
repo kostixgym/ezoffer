@@ -1,0 +1,16 @@
+[Server]
+Host      = "localhost"
+Port      = 8075
+IsDevel   = true
+
+[Database]
+Addr            = "localhost:5432"
+User            = "postgres"
+Database        = "ezoffer"
+Password        = ""
+PoolSize        = 5
+ApplicationName = "ezoffer"
+
+[Sentry]
+DSN         = ""
+Environment = ""

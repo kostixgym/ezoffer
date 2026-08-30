@@ -1,3 +1,14 @@
+.idea
+.vscode
+cfg/local.toml
+coverage.txt
+coverage.xml
+Makefile.mk
+/ezoffer
 
+# Зависимости собираются из модульного кэша, go.mod и go.sum фиксируют версии
+vendor/
+
+# Исходные выгрузки данных — не публикуем
 data/
 *.csv
