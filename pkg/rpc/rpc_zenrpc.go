@@ -12,6 +12,7 @@ import (
 
 var RPC = struct {
 	DictionaryService     struct{ Companies, Skills string }
+	InterviewService      struct{ List, Get string }
 	QuestionService       struct{ List, Get string }
 	TaskService           struct{ List, Get string }
 	TestAssignmentService struct{ List, Get string }
@@ -19,6 +20,10 @@ var RPC = struct {
 	DictionaryService: struct{ Companies, Skills string }{
 		Companies: "companies",
 		Skills:    "skills",
+	},
+	InterviewService: struct{ List, Get string }{
+		List: "list",
+		Get:  "get",
 	},
 	QuestionService: struct{ List, Get string }{
 		List: "list",
@@ -111,6 +116,343 @@ func (s DictionaryService) Invoke(ctx context.Context, method string, params jso
 
 	case RPC.DictionaryService.Skills:
 		resp.Set(s.Skills(ctx))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
+}
+
+func (InterviewService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"List": {
+				Description: `List returns a page of interview recordings, newest published first.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "page",
+						Optional:    true,
+						Description: `page number, starts at 1`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "pageSize",
+						Optional:    true,
+						Description: `items per page, capped at 100`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `substring to search in title`,
+						Type:        smd.String,
+					},
+					{
+						Name:        "grades",
+						Description: `filter by grades: junior, middle, senior, lead`,
+						Type:        smd.Array,
+						TypeName:    "[]",
+						Items: map[string]string{
+							"type": smd.String,
+						},
+					},
+					{
+						Name:        "types",
+						Description: `filter by types: technical, liveCoding, algorithmic, hrScreening, final, systemDesign`,
+						Type:        smd.Array,
+						TypeName:    "[]",
+						Items: map[string]string{
+							"type": smd.String,
+						},
+					},
+					{
+						Name:        "companyID",
+						Optional:    true,
+						Description: `filter by company`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "isReal",
+						Optional:    true,
+						Description: `keep only recordings of real interviews`,
+						Type:        smd.Boolean,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `interviews page with total count`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "InterviewList",
+					Properties: smd.PropertyList{
+						{
+							Name: "items",
+							Type: smd.Array,
+							Items: map[string]string{
+								"$ref": "#/definitions/Interview",
+							},
+						},
+						{
+							Name: "totalCount",
+							Type: smd.Integer,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Interview": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "slug",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name: "grades",
+									Type: smd.Array,
+									Items: map[string]string{
+										"type": smd.String,
+									},
+								},
+								{
+									Name: "types",
+									Type: smd.Array,
+									Items: map[string]string{
+										"type": smd.String,
+									},
+								},
+								{
+									Name:     "company",
+									Optional: true,
+									Ref:      "#/definitions/Company",
+									Type:     smd.Object,
+								},
+								{
+									Name:     "video",
+									Optional: true,
+									Ref:      "#/definitions/Video",
+									Type:     smd.Object,
+								},
+								{
+									Name: "isReal",
+									Type: smd.Boolean,
+								},
+								{
+									Name:     "publishedDate",
+									Optional: true,
+									Type:     smd.String,
+								},
+							},
+						},
+						"Company": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+						"Video": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "kind",
+									Type: smd.String,
+								},
+								{
+									Name: "url",
+									Type: smd.String,
+								},
+								{
+									Name: "embeddable",
+									Type: smd.Boolean,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					400: "unknown grade or type",
+					500: "internal error",
+				},
+			},
+			"Get": {
+				Description: `Get returns a single interview by id.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `interview id`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `interview`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "Interview",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "slug",
+							Type: smd.String,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name: "grades",
+							Type: smd.Array,
+							Items: map[string]string{
+								"type": smd.String,
+							},
+						},
+						{
+							Name: "types",
+							Type: smd.Array,
+							Items: map[string]string{
+								"type": smd.String,
+							},
+						},
+						{
+							Name:     "company",
+							Optional: true,
+							Ref:      "#/definitions/Company",
+							Type:     smd.Object,
+						},
+						{
+							Name:     "video",
+							Optional: true,
+							Ref:      "#/definitions/Video",
+							Type:     smd.Object,
+						},
+						{
+							Name: "isReal",
+							Type: smd.Boolean,
+						},
+						{
+							Name:     "publishedDate",
+							Optional: true,
+							Type:     smd.String,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Company": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+						"Video": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "kind",
+									Type: smd.String,
+								},
+								{
+									Name: "url",
+									Type: smd.String,
+								},
+								{
+									Name: "embeddable",
+									Type: smd.Boolean,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					404: "interview not found",
+					500: "internal error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s InterviewService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+	var err error
+
+	switch method {
+	case RPC.InterviewService.List:
+		var args = struct {
+			Page      *int     `json:"page"`
+			PageSize  *int     `json:"pageSize"`
+			Search    *string  `json:"search"`
+			Grades    []string `json:"grades"`
+			Types     []string `json:"types"`
+			CompanyID *int64   `json:"companyID"`
+			IsReal    *bool    `json:"isReal"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"page", "pageSize", "search", "grades", "types", "companyID", "isReal"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		//zenrpc:page=1 page number, starts at 1
+		if args.Page == nil {
+			var v int = 1
+			args.Page = &v
+		}
+
+		//zenrpc:pageSize=25 items per page, capped at 100
+		if args.PageSize == nil {
+			var v int = 25
+			args.PageSize = &v
+		}
+
+		resp.Set(s.List(ctx, *args.Page, *args.PageSize, args.Search, args.Grades, args.Types, args.CompanyID, args.IsReal))
+
+	case RPC.InterviewService.Get:
+		var args = struct {
+			Id int64 `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Get(ctx, args.Id))
 
 	default:
 		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
