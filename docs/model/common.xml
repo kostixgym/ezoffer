@@ -151,6 +151,7 @@
                 <Search Name="TitleILike" AttrName="Title" SearchType="SEARCHTYPE_ILIKE"></Search>
                 <Search Name="ContentILike" AttrName="Content" SearchType="SEARCHTYPE_ILIKE"></Search>
                 <Search Name="SourceUrlILike" AttrName="SourceUrl" SearchType="SEARCHTYPE_ILIKE"></Search>
+                <Search Name="GradesIntersect" AttrName="Grades" SearchType="SEARCHTYPE_ARRAY_INTERSECT"></Search>
             </Searches>
         </Entity>
         <Entity Name="TestAssignmentsCompany" Namespace="common" Table="testAssignmentsCompanies">

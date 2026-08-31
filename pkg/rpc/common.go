@@ -31,8 +31,14 @@ func listError(ctx context.Context, log embedlog.Logger, msg string, err error) 
 // entries apart, small enough to keep a page of 100 in the tens of kilobytes.
 const excerptRunes = 200
 
-// Company is shared by every catalog that shows where a task came from.
+// Company and Skill are shared by the task, test assignment and interview
+// catalogs — all three show the same shallow dictionary entry.
 type Company struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+type Skill struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
@@ -41,6 +47,15 @@ func NewCompanies(in []db.Company) []Company {
 	out := make([]Company, 0, len(in))
 	for _, c := range in {
 		out = append(out, Company{ID: c.ID, Name: c.Name})
+	}
+
+	return out
+}
+
+func NewSkills(in []db.Skill) []Skill {
+	out := make([]Skill, 0, len(in))
+	for _, s := range in {
+		out = append(out, Skill{ID: s.ID, Name: s.Name})
 	}
 
 	return out
