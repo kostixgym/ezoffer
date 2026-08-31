@@ -58,8 +58,8 @@
       <column name="sourceId" type="bigint"></column>
       <column name="slug" type="varchar" length="255" nullable="false"></column>
       <column name="title" type="varchar" length="255" nullable="false"></column>
-      <column name="grades" type="varchar[]" nullable="false" default="'{}'"></column>
-      <column name="types" type="varchar[]" nullable="false" default="'{}'"></column>
+      <column name="grades" type="text[]" nullable="false" default="'{}'"></column>
+      <column name="types" type="text[]" nullable="false" default="'{}'"></column>
       <column name="companyId" type="bigint"></column>
       <column name="youtubeUrl" type="text"></column>
       <column name="vfsPath" type="text"></column>
@@ -81,8 +81,8 @@
       <unique name="">
         <column name="sourceId"></column>
       </unique>
-      <check name="chk_interviews_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::varchar[]]]></check>
-      <check name="chk_interviews_types"><![CDATA["types" <@ ARRAY['technical','liveCoding','algorithmic','hrScreening','final','systemDesign']::varchar[]]]></check>
+      <check name="chk_interviews_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::text[]]]></check>
+      <check name="chk_interviews_types"><![CDATA["types" <@ ARRAY['technical','liveCoding','algorithmic','hrScreening','final','systemDesign']::text[]]]></check>
       <check name="chk_interviews_video"><![CDATA["youtubeUrl" IS NOT NULL OR "vfsPath" IS NOT NULL OR "sourceUrl" IS NOT NULL]]></check>
     </table>
     <table name="questions">
@@ -132,7 +132,7 @@
       <column name="sourceId" type="bigint" nullable="false"></column>
       <column name="slug" type="varchar" length="255" nullable="false"></column>
       <column name="title" type="varchar" length="255" nullable="false"></column>
-      <column name="grades" type="varchar[]" nullable="false" default="'{}'"></column>
+      <column name="grades" type="text[]" nullable="false" default="'{}'"></column>
       <column name="type" type="varchar" length="20"></column>
       <column name="content" type="text" nullable="false"></column>
       <column name="sourceUrl" type="text"></column>
@@ -148,7 +148,7 @@
       <unique name="">
         <column name="sourceId"></column>
       </unique>
-      <check name="chk_tasks_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::varchar[]]]></check>
+      <check name="chk_tasks_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::text[]]]></check>
       <check name="chk_tasks_type"><![CDATA["type" IS NULL OR "type" = ANY (ARRAY['liveCoding','algorithms','systemDesign'])]]></check>
     </table>
     <table name="tasksCompanies">
@@ -169,7 +169,7 @@
       <column name="testAssignmentId" type="bigint" nullable="false"><identity generated="by default"></identity></column>
       <column name="slug" type="varchar" length="255" nullable="false"></column>
       <column name="title" type="varchar" length="255" nullable="false"></column>
-      <column name="grades" type="varchar[]" nullable="false" default="'{}'"></column>
+      <column name="grades" type="text[]" nullable="false" default="'{}'"></column>
       <column name="content" type="text" nullable="false"></column>
       <column name="sourceUrl" type="text"></column>
       <column name="publishedDate" type="date"></column>
@@ -180,7 +180,7 @@
       <unique name="">
         <column name="slug"></column>
       </unique>
-      <check name="chk_testAssignments_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::varchar[]]]></check>
+      <check name="chk_testAssignments_grades"><![CDATA["grades" <@ ARRAY['junior','middle','senior','lead']::text[]]]></check>
     </table>
     <table name="testAssignmentsCompanies">
       <column name="testAssignmentId" type="bigint" nullable="false"></column>

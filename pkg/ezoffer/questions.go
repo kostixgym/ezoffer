@@ -2,7 +2,6 @@ package ezoffer
 
 import (
 	"context"
-	"strings"
 
 	"ezoffer/pkg/db"
 )
@@ -20,19 +19,16 @@ type QuestionItem struct {
 	GradeChance *float32
 }
 
-func strValue(v *string) string {
-	if v == nil {
-		return ""
-	}
-
-	return strings.TrimSpace(*v)
-}
-
 // Questions returns a page of questions and the total count. With a grade filter
 // the query is turned inside out: the grade table becomes the main one and the
 // question is pulled in as a relation, so ordering happens by the grade chance.
 func (m *Manager) Questions(ctx context.Context, p QuestionListParams) ([]QuestionItem, int, error) {
-	if grade := strings.ToLower(strValue(p.Grade)); grade != "" {
+	if raw := strValue(p.Grade); raw != "" {
+		grade, err := canonical("grade", raw, gradeValues)
+		if err != nil {
+			return nil, 0, err
+		}
+
 		return m.questionsByGrade(ctx, p, grade)
 	}
 

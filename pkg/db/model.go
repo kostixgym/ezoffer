@@ -21,7 +21,7 @@ var Columns = struct {
 		ID, Name string
 	}
 	Interview struct {
-		ID, SourceID, Slug, Title, Grades, Types, CompanyID, YoutubeUrl, VfsPath, SourceUrl, IsEmbeddable, IsReal, IsVisible, PublishedDate, CreatedAt string
+		ID, SourceID, Slug, Title, CompanyID, YoutubeUrl, VfsPath, SourceUrl, IsEmbeddable, IsReal, IsVisible, PublishedDate, CreatedAt, Grades, Types string
 
 		Company string
 	}
@@ -37,7 +37,7 @@ var Columns = struct {
 		ID, Name string
 	}
 	Task struct {
-		ID, SourceID, Slug, Title, Grades, Type, Content, SourceUrl, Rank, LastDate, CreatedAt string
+		ID, SourceID, Slug, Title, Type, Content, SourceUrl, Rank, LastDate, CreatedAt, Grades string
 	}
 	TasksCompany struct {
 		TaskID, CompanyID string
@@ -45,7 +45,7 @@ var Columns = struct {
 		Task, Company string
 	}
 	TestAssignment struct {
-		ID, Slug, Title, Grades, Content, SourceUrl, PublishedDate, CreatedAt string
+		ID, Slug, Title, Content, SourceUrl, PublishedDate, CreatedAt, Grades string
 	}
 	TestAssignmentsCompany struct {
 		TestAssignmentID, CompanyID string
@@ -93,7 +93,7 @@ var Columns = struct {
 		Name: "name",
 	},
 	Interview: struct {
-		ID, SourceID, Slug, Title, Grades, Types, CompanyID, YoutubeUrl, VfsPath, SourceUrl, IsEmbeddable, IsReal, IsVisible, PublishedDate, CreatedAt string
+		ID, SourceID, Slug, Title, CompanyID, YoutubeUrl, VfsPath, SourceUrl, IsEmbeddable, IsReal, IsVisible, PublishedDate, CreatedAt, Grades, Types string
 
 		Company string
 	}{
@@ -101,8 +101,6 @@ var Columns = struct {
 		SourceID:      "sourceId",
 		Slug:          "slug",
 		Title:         "title",
-		Grades:        "grades",
-		Types:         "types",
 		CompanyID:     "companyId",
 		YoutubeUrl:    "youtubeUrl",
 		VfsPath:       "vfsPath",
@@ -112,6 +110,8 @@ var Columns = struct {
 		IsVisible:     "isVisible",
 		PublishedDate: "publishedDate",
 		CreatedAt:     "createdAt",
+		Grades:        "grades",
+		Types:         "types",
 
 		Company: "Company",
 	},
@@ -143,19 +143,19 @@ var Columns = struct {
 		Name: "name",
 	},
 	Task: struct {
-		ID, SourceID, Slug, Title, Grades, Type, Content, SourceUrl, Rank, LastDate, CreatedAt string
+		ID, SourceID, Slug, Title, Type, Content, SourceUrl, Rank, LastDate, CreatedAt, Grades string
 	}{
 		ID:        "taskId",
 		SourceID:  "sourceId",
 		Slug:      "slug",
 		Title:     "title",
-		Grades:    "grades",
 		Type:      "type",
 		Content:   "content",
 		SourceUrl: "sourceUrl",
 		Rank:      "rank",
 		LastDate:  "lastDate",
 		CreatedAt: "createdAt",
+		Grades:    "grades",
 	},
 	TasksCompany: struct {
 		TaskID, CompanyID string
@@ -169,16 +169,16 @@ var Columns = struct {
 		Company: "Company",
 	},
 	TestAssignment: struct {
-		ID, Slug, Title, Grades, Content, SourceUrl, PublishedDate, CreatedAt string
+		ID, Slug, Title, Content, SourceUrl, PublishedDate, CreatedAt, Grades string
 	}{
 		ID:            "testAssignmentId",
 		Slug:          "slug",
 		Title:         "title",
-		Grades:        "grades",
 		Content:       "content",
 		SourceUrl:     "sourceUrl",
 		PublishedDate: "publishedDate",
 		CreatedAt:     "createdAt",
+		Grades:        "grades",
 	},
 	TestAssignmentsCompany: struct {
 		TestAssignmentID, CompanyID string
@@ -358,8 +358,6 @@ type Interview struct {
 	SourceID      *int64     `pg:"sourceId"`
 	Slug          string     `pg:"slug,use_zero"`
 	Title         string     `pg:"title,use_zero"`
-	Grades        []string   `pg:"grades,array,use_zero"`
-	Types         []string   `pg:"types,array,use_zero"`
 	CompanyID     *int64     `pg:"companyId"`
 	YoutubeUrl    *string    `pg:"youtubeUrl"`
 	VfsPath       *string    `pg:"vfsPath"`
@@ -369,6 +367,8 @@ type Interview struct {
 	IsVisible     bool       `pg:"isVisible,use_zero"`
 	PublishedDate *time.Time `pg:"publishedDate"`
 	CreatedAt     time.Time  `pg:"createdAt,use_zero"`
+	Grades        []string   `pg:"grades,array,use_zero"`
+	Types         []string   `pg:"types,array,use_zero"`
 
 	Company *Company `pg:"fk:companyId,rel:has-one"`
 }
@@ -408,13 +408,13 @@ type Task struct {
 	SourceID  int64      `pg:"sourceId,use_zero"`
 	Slug      string     `pg:"slug,use_zero"`
 	Title     string     `pg:"title,use_zero"`
-	Grades    []string   `pg:"grades,array,use_zero"`
 	Type      *string    `pg:"type"`
 	Content   string     `pg:"content,use_zero"`
 	SourceUrl *string    `pg:"sourceUrl"`
 	Rank      *int       `pg:"rank"`
 	LastDate  *time.Time `pg:"lastDate"`
 	CreatedAt time.Time  `pg:"createdAt,use_zero"`
+	Grades    []string   `pg:"grades,array,use_zero"`
 }
 
 type TasksCompany struct {
@@ -433,11 +433,11 @@ type TestAssignment struct {
 	ID            int64      `pg:"testAssignmentId,pk"`
 	Slug          string     `pg:"slug,use_zero"`
 	Title         string     `pg:"title,use_zero"`
-	Grades        []string   `pg:"grades,array,use_zero"`
 	Content       string     `pg:"content,use_zero"`
 	SourceUrl     *string    `pg:"sourceUrl"`
 	PublishedDate *time.Time `pg:"publishedDate"`
 	CreatedAt     time.Time  `pg:"createdAt,use_zero"`
+	Grades        []string   `pg:"grades,array,use_zero"`
 }
 
 type TestAssignmentsCompany struct {
