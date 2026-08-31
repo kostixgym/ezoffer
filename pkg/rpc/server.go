@@ -55,6 +55,7 @@ func New(dbo db.DB, logger embedlog.Logger, isDevel bool) *zenrpc.Server {
 		"task":           NewTaskService(m, logger),
 		"testAssignment": NewTestAssignmentService(m, logger),
 		"interview":      NewInterviewService(m, logger),
+		"comment":        NewCommentService(m, logger),
 		"dictionary":     NewDictionaryService(m, logger),
 	})
 

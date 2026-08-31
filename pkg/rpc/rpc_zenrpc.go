@@ -11,12 +11,18 @@ import (
 )
 
 var RPC = struct {
+	CommentService        struct{ List, Create, Like string }
 	DictionaryService     struct{ Companies, Skills string }
 	InterviewService      struct{ List, Get string }
 	QuestionService       struct{ List, Get string }
 	TaskService           struct{ List, Get string }
 	TestAssignmentService struct{ List, Get string }
 }{
+	CommentService: struct{ List, Create, Like string }{
+		List:   "list",
+		Create: "create",
+		Like:   "like",
+	},
 	DictionaryService: struct{ Companies, Skills string }{
 		Companies: "companies",
 		Skills:    "skills",
@@ -37,6 +43,254 @@ var RPC = struct {
 		List: "list",
 		Get:  "get",
 	},
+}
+
+func (CommentService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"List": {
+				Description: `List returns a page of comments on one entity, newest first.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "entity",
+						Description: `question, task, testAssignment or interview`,
+						Type:        smd.String,
+					},
+					{
+						Name:        "entityID",
+						Description: `id of that entity`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "page",
+						Optional:    true,
+						Description: `page number, starts at 1`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "pageSize",
+						Optional:    true,
+						Description: `items per page, capped at 100`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "byLikes",
+						Optional:    true,
+						Description: `order by likes instead of date`,
+						Type:        smd.Boolean,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `comments page with total count`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "CommentList",
+					Properties: smd.PropertyList{
+						{
+							Name: "items",
+							Type: smd.Array,
+							Items: map[string]string{
+								"$ref": "#/definitions/Comment",
+							},
+						},
+						{
+							Name: "totalCount",
+							Type: smd.Integer,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Comment": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "content",
+									Type: smd.String,
+								},
+								{
+									Name: "likesCnt",
+									Type: smd.Integer,
+								},
+								{
+									Name: "createdAt",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					400: "unknown entity",
+					500: "internal error",
+				},
+			},
+			"Create": {
+				Description: `Create adds an anonymous comment to an entity.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "entity",
+						Description: `question, task, testAssignment or interview`,
+						Type:        smd.String,
+					},
+					{
+						Name:        "entityID",
+						Description: `id of that entity`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "content",
+						Description: `comment text, up to 4000 characters`,
+						Type:        smd.String,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `created comment`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "Comment",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "content",
+							Type: smd.String,
+						},
+						{
+							Name: "likesCnt",
+							Type: smd.Integer,
+						},
+						{
+							Name: "createdAt",
+							Type: smd.String,
+						},
+					},
+				},
+				Errors: map[int]string{
+					400: "unknown entity or empty content",
+					404: "entity not found",
+					500: "internal error",
+				},
+			},
+			"Like": {
+				Description: `Like adds one like to a comment and returns the new counter.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `comment id`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `new like count`,
+					Optional:    true,
+					Type:        smd.Integer,
+				},
+				Errors: map[int]string{
+					404: "comment not found",
+					500: "internal error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s CommentService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+	var err error
+
+	switch method {
+	case RPC.CommentService.List:
+		var args = struct {
+			Entity   string `json:"entity"`
+			EntityID int64  `json:"entityID"`
+			Page     *int   `json:"page"`
+			PageSize *int   `json:"pageSize"`
+			ByLikes  *bool  `json:"byLikes"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"entity", "entityID", "page", "pageSize", "byLikes"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		//zenrpc:byLikes=false order by likes instead of date
+		if args.ByLikes == nil {
+			var v bool = false
+			args.ByLikes = &v
+		}
+
+		//zenrpc:page=1 page number, starts at 1
+		if args.Page == nil {
+			var v int = 1
+			args.Page = &v
+		}
+
+		//zenrpc:pageSize=25 items per page, capped at 100
+		if args.PageSize == nil {
+			var v int = 25
+			args.PageSize = &v
+		}
+
+		resp.Set(s.List(ctx, args.Entity, args.EntityID, *args.Page, *args.PageSize, *args.ByLikes))
+
+	case RPC.CommentService.Create:
+		var args = struct {
+			Entity   string `json:"entity"`
+			EntityID int64  `json:"entityID"`
+			Content  string `json:"content"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"entity", "entityID", "content"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Create(ctx, args.Entity, args.EntityID, args.Content))
+
+	case RPC.CommentService.Like:
+		var args = struct {
+			Id int64 `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Like(ctx, args.Id))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
 }
 
 func (DictionaryService) SMD() smd.ServiceInfo {
