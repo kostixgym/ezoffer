@@ -19,5 +19,5 @@ psql -d postgres -v ON_ERROR_STOP=1 -q \
 	-c "DROP DATABASE IF EXISTS \"$db\";" \
 	-c "CREATE DATABASE \"$db\";"
 
-psql -d "$db" -v ON_ERROR_STOP=1 -q -f ezoffer.sql
+psql -d "$db" -v ON_ERROR_STOP=1 -q -f docs/ezoffer.sql
 psql -d "$db" -v ON_ERROR_STOP=1 -f import/import.sql

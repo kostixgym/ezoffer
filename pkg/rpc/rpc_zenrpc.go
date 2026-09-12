@@ -12,8 +12,13 @@ import (
 
 var RPC = struct {
 	QuestionService struct{ List, Get string }
+	TaskService     struct{ List, Get string }
 }{
 	QuestionService: struct{ List, Get string }{
+		List: "list",
+		Get:  "get",
+	},
+	TaskService: struct{ List, Get string }{
 		List: "list",
 		Get:  "get",
 	},
@@ -103,6 +108,7 @@ list is filtered by grade, null otherwise.`,
 					},
 				},
 				Errors: map[int]string{
+					400: "unknown grade",
 					500: "internal error",
 				},
 			},
@@ -199,6 +205,290 @@ func (s QuestionService) Invoke(ctx context.Context, method string, params json.
 		resp.Set(s.List(ctx, *args.Page, *args.PageSize, args.Search, args.Grade))
 
 	case RPC.QuestionService.Get:
+		var args = struct {
+			Id int64 `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Get(ctx, args.Id))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
+}
+
+func (TaskService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"List": {
+				Description: `List returns a page of live coding tasks.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "page",
+						Optional:    true,
+						Description: `page number, starts at 1`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "pageSize",
+						Optional:    true,
+						Description: `items per page, capped at 100`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `substring to search in task title`,
+						Type:        smd.String,
+					},
+					{
+						Name:        "grades",
+						Description: `filter by grades: junior, middle, senior, lead`,
+						Type:        smd.Array,
+						TypeName:    "[]",
+						Items: map[string]string{
+							"type": smd.String,
+						},
+					},
+					{
+						Name:        "taskType",
+						Optional:    true,
+						Description: `filter by type: liveCoding, algorithms or systemDesign`,
+						Type:        smd.String,
+					},
+					{
+						Name:        "companyID",
+						Optional:    true,
+						Description: `filter by company`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `tasks page with total count`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "TaskList",
+					Properties: smd.PropertyList{
+						{
+							Name: "items",
+							Type: smd.Array,
+							Items: map[string]string{
+								"$ref": "#/definitions/TaskSummary",
+							},
+						},
+						{
+							Name: "totalCount",
+							Type: smd.Integer,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"TaskSummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "slug",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name: "grades",
+									Type: smd.Array,
+									Items: map[string]string{
+										"type": smd.String,
+									},
+								},
+								{
+									Name:     "type",
+									Optional: true,
+									Type:     smd.String,
+								},
+								{
+									Name: "companies",
+									Type: smd.Array,
+									Items: map[string]string{
+										"$ref": "#/definitions/Company",
+									},
+								},
+								{
+									Name: "excerpt",
+									Type: smd.String,
+								},
+								{
+									Name:     "lastDate",
+									Optional: true,
+									Type:     smd.String,
+								},
+							},
+						},
+						"Company": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					400: "unknown grade or type",
+					500: "internal error",
+				},
+			},
+			"Get": {
+				Description: `Get returns a single task by id.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `task id`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `task`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "Task",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "slug",
+							Type: smd.String,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name: "grades",
+							Type: smd.Array,
+							Items: map[string]string{
+								"type": smd.String,
+							},
+						},
+						{
+							Name:     "type",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name: "companies",
+							Type: smd.Array,
+							Items: map[string]string{
+								"$ref": "#/definitions/Company",
+							},
+						},
+						{
+							Name: "content",
+							Type: smd.String,
+						},
+						{
+							Name:     "sourceUrl",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name:     "lastDate",
+							Optional: true,
+							Type:     smd.String,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Company": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					404: "task not found",
+					500: "internal error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s TaskService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+	var err error
+
+	switch method {
+	case RPC.TaskService.List:
+		var args = struct {
+			Page      *int     `json:"page"`
+			PageSize  *int     `json:"pageSize"`
+			Search    *string  `json:"search"`
+			Grades    []string `json:"grades"`
+			TaskType  *string  `json:"taskType"`
+			CompanyID *int64   `json:"companyID"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"page", "pageSize", "search", "grades", "taskType", "companyID"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		//zenrpc:page=1 page number, starts at 1
+		if args.Page == nil {
+			var v int = 1
+			args.Page = &v
+		}
+
+		//zenrpc:pageSize=25 items per page, capped at 100
+		if args.PageSize == nil {
+			var v int = 25
+			args.PageSize = &v
+		}
+
+		resp.Set(s.List(ctx, *args.Page, *args.PageSize, args.Search, args.Grades, args.TaskType, args.CompanyID))
+
+	case RPC.TaskService.Get:
 		var args = struct {
 			Id int64 `json:"id"`
 		}{}

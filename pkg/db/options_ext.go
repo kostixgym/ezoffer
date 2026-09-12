@@ -19,3 +19,16 @@ func WithQuestionsGradeContentILike(v string) OpFunc {
 		)
 	}
 }
+
+// WithTaskCompanyID filters a tasks query by company. Bound to that query: the
+// condition is written against the "t" alias of tasks.
+//
+// A semi-join for the same reason as above — CountTasks runs without any join.
+func WithTaskCompanyID(companyID int64) OpFunc {
+	return func(query *orm.Query) {
+		query.Where(
+			`"t"."taskId" IN (SELECT "taskId" FROM "tasksCompanies" WHERE "companyId" = ?)`,
+			companyID,
+		)
+	}
+}

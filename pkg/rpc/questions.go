@@ -56,6 +56,7 @@ func NewQuestionService(m *ezoffer.Manager, logger embedlog.Logger) *QuestionSer
 //zenrpc:search substring to search in question text
 //zenrpc:grade filter by grade: junior, middle, senior or lead
 //zenrpc:return questions page with total count
+//zenrpc:400 unknown grade
 //zenrpc:500 internal error
 func (s QuestionService) List(ctx context.Context, page, pageSize int, search, grade *string) (*QuestionList, error) {
 	page, pageSize = normalizePager(page, pageSize)
@@ -67,8 +68,7 @@ func (s QuestionService) List(ctx context.Context, page, pageSize int, search, g
 		PageSize: pageSize,
 	})
 	if err != nil {
-		s.Error(ctx, "failed to list questions", "err", err)
-		return nil, ErrInternal
+		return nil, listError(ctx, s.Logger, "failed to list questions", err)
 	}
 
 	items := make([]Question, 0, len(questions))

@@ -447,22 +447,23 @@ func (ss *SkillSearch) Q() applier {
 type TaskSearch struct {
 	search
 
-	ID             *int64
-	SourceID       *int64
-	Slug           *string
-	Title          *string
-	Type           *string
-	Content        *string
-	SourceUrl      *string
-	Rank           *int
-	LastDate       *time.Time
-	CreatedAt      *time.Time
-	IDs            []int64
-	SlugILike      *string
-	TitleILike     *string
-	TypeILike      *string
-	ContentILike   *string
-	SourceUrlILike *string
+	ID              *int64
+	SourceID        *int64
+	Slug            *string
+	Title           *string
+	Type            *string
+	Content         *string
+	SourceUrl       *string
+	Rank            *int
+	LastDate        *time.Time
+	CreatedAt       *time.Time
+	IDs             []int64
+	SlugILike       *string
+	TitleILike      *string
+	TypeILike       *string
+	ContentILike    *string
+	SourceUrlILike  *string
+	GradesIntersect []string
 }
 
 func (ts *TaskSearch) Apply(query *orm.Query) *orm.Query {
@@ -516,6 +517,9 @@ func (ts *TaskSearch) Apply(query *orm.Query) *orm.Query {
 	}
 	if ts.SourceUrlILike != nil {
 		Filter{Columns.Task.SourceUrl, *ts.SourceUrlILike, SearchTypeILike, false}.Apply(query)
+	}
+	if len(ts.GradesIntersect) > 0 {
+		Filter{Columns.Task.Grades, ts.GradesIntersect, SearchTypeArrayIntersect, false}.Apply(query)
 	}
 
 	ts.apply(query)
