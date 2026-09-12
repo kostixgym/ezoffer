@@ -24,6 +24,8 @@ var (
 	gradeValues = canonicalMap("junior", "middle", "senior", "lead")
 
 	taskTypeValues = canonicalMap("liveCoding", "algorithms", "systemDesign")
+
+	interviewTypeValues = canonicalMap("technical", "liveCoding", "algorithmic", "hrScreening", "final", "systemDesign")
 )
 
 func canonicalMap(values ...string) map[string]string {

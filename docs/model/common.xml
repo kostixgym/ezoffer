@@ -61,6 +61,8 @@
                 <Search Name="YoutubeUrlILike" AttrName="YoutubeUrl" SearchType="SEARCHTYPE_ILIKE"></Search>
                 <Search Name="VfsPathILike" AttrName="VfsPath" SearchType="SEARCHTYPE_ILIKE"></Search>
                 <Search Name="SourceUrlILike" AttrName="SourceUrl" SearchType="SEARCHTYPE_ILIKE"></Search>
+                <Search Name="GradesIntersect" AttrName="Grades" SearchType="SEARCHTYPE_ARRAY_INTERSECT"></Search>
+                <Search Name="TypesIntersect" AttrName="Types" SearchType="SEARCHTYPE_ARRAY_INTERSECT"></Search>
             </Searches>
         </Entity>
         <Entity Name="Question" Namespace="common" Table="questions">

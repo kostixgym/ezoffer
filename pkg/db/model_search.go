@@ -218,6 +218,8 @@ type InterviewSearch struct {
 	YoutubeUrlILike *string
 	VfsPathILike    *string
 	SourceUrlILike  *string
+	GradesIntersect []string
+	TypesIntersect  []string
 }
 
 func (is *InterviewSearch) Apply(query *orm.Query) *orm.Query {
@@ -280,6 +282,12 @@ func (is *InterviewSearch) Apply(query *orm.Query) *orm.Query {
 	}
 	if is.SourceUrlILike != nil {
 		Filter{Columns.Interview.SourceUrl, *is.SourceUrlILike, SearchTypeILike, false}.Apply(query)
+	}
+	if len(is.GradesIntersect) > 0 {
+		Filter{Columns.Interview.Grades, is.GradesIntersect, SearchTypeArrayIntersect, false}.Apply(query)
+	}
+	if len(is.TypesIntersect) > 0 {
+		Filter{Columns.Interview.Types, is.TypesIntersect, SearchTypeArrayIntersect, false}.Apply(query)
 	}
 
 	is.apply(query)
