@@ -15,16 +15,14 @@ type TestAssignmentListParams struct {
 	PageSize  int
 }
 
-// TestAssignmentItem is an assignment together with the companies that gave it
-// and the skills it checks.
+
 type TestAssignmentItem struct {
 	TestAssignment db.TestAssignment
 	Companies      []db.Company
 	Skills         []db.Skill
 }
 
-// TestAssignments returns a page of test assignments and the total count, newest
-// published first.
+
 func (m *Manager) TestAssignments(ctx context.Context, p TestAssignmentListParams) ([]TestAssignmentItem, int, error) {
 	search := &db.TestAssignmentSearch{}
 	if text := strValue(p.Search); text != "" {
@@ -40,9 +38,6 @@ func (m *Manager) TestAssignments(ctx context.Context, p TestAssignmentListParam
 		search.GradesIntersect = grades
 	}
 
-	// Companies and skills live in join tables, so they cannot go into the
-	// generated search. The ops have to reach the count query too, otherwise
-	// totalCount and items stop matching.
 	var ops []db.OpFunc
 	if p.CompanyID != nil {
 		ops = append(ops, db.WithTestAssignmentCompanyID(*p.CompanyID))
@@ -77,7 +72,7 @@ func (m *Manager) TestAssignments(ctx context.Context, p TestAssignmentListParam
 	return items, count, nil
 }
 
-// TestAssignment returns test assignment by id. Returns nil when it is not found.
+
 func (m *Manager) TestAssignment(ctx context.Context, id int64) (*TestAssignmentItem, error) {
 	assignment, err := m.repo.TestAssignmentByID(ctx, id)
 	if err != nil {
@@ -96,8 +91,7 @@ func (m *Manager) TestAssignment(ctx context.Context, id int64) (*TestAssignment
 	return &items[0], nil
 }
 
-// testAssignmentItems attaches companies and skills to a whole page at once
-// instead of querying per assignment.
+
 func (m *Manager) testAssignmentItems(ctx context.Context, assignments []db.TestAssignment) ([]TestAssignmentItem, error) {
 	ids := make([]int64, 0, len(assignments))
 	for _, a := range assignments {

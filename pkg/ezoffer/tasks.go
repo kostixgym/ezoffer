@@ -15,14 +15,12 @@ type TaskListParams struct {
 	PageSize  int
 }
 
-// TaskItem is a task together with the companies it was asked at.
 type TaskItem struct {
 	Task      db.Task
 	Companies []db.Company
 }
 
-// Tasks returns a page of tasks and the total count, ordered by the rank the
-// source assigned them.
+
 func (m *Manager) Tasks(ctx context.Context, p TaskListParams) ([]TaskItem, int, error) {
 	search := &db.TaskSearch{}
 	if text := strValue(p.Search); text != "" {

@@ -19,9 +19,6 @@ type QuestionItem struct {
 	GradeChance *float32
 }
 
-// Questions returns a page of questions and the total count. With a grade filter
-// the query is turned inside out: the grade table becomes the main one and the
-// question is pulled in as a relation, so ordering happens by the grade chance.
 func (m *Manager) Questions(ctx context.Context, p QuestionListParams) ([]QuestionItem, int, error) {
 	if raw := strValue(p.Grade); raw != "" {
 		grade, err := canonical("grade", raw, gradeValues)
@@ -43,9 +40,6 @@ func (m *Manager) questionsAll(ctx context.Context, p QuestionListParams) ([]Que
 
 	pager := db.NewPager(p.Page, p.PageSize)
 
-	// Chance is far from unique — 2409 of 2425 questions share it with someone,
-	// and 1833 sit on a single value. Without a unique tiebreaker the order
-	// inside a group is undefined, and rows drift between pages.
 	sort := db.WithSort(
 		db.SortField{Column: db.Columns.Question.Frequency, Direction: db.SortDescNullsLast},
 		db.SortField{Column: db.Columns.Question.ID, Direction: db.SortAsc},
@@ -73,7 +67,6 @@ func (m *Manager) questionsByGrade(ctx context.Context, p QuestionListParams, gr
 	search := &db.QuestionsGradeSearch{Grade: &grade}
 	pager := db.NewPager(p.Page, p.PageSize)
 
-	// ops go into both queries: the count must be filtered exactly like the page.
 	var ops []db.OpFunc
 	if text := strValue(p.Search); text != "" {
 		ops = append(ops, db.WithQuestionsGradeContentILike(text))
@@ -100,8 +93,6 @@ func (m *Manager) questionsByGrade(ctx context.Context, p QuestionListParams, gr
 	items := make([]QuestionItem, 0, len(grades))
 	for _, g := range grades {
 		if g.Question == nil {
-			// Impossible while the foreign key holds, and silent skipping would
-			// leave items shorter than totalCount.
 			m.Error(ctx, "questionsGrade without a question", "questionId", g.QuestionID, "grade", g.Grade)
 
 			continue
@@ -113,7 +104,6 @@ func (m *Manager) questionsByGrade(ctx context.Context, p QuestionListParams, gr
 	return items, count, nil
 }
 
-// Question returns question by id. Returns nil when question is not found.
 func (m *Manager) Question(ctx context.Context, id int64) (*db.Question, error) {
 	return m.repo.QuestionByID(ctx, id)
 }

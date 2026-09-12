@@ -65,8 +65,7 @@ func (m *Manager) Comments(ctx context.Context, p CommentListParams) ([]db.Comme
 	return comments, count, nil
 }
 
-// AddComment attaches an anonymous comment to an entity. Returns nil when the
-// entity does not exist.
+
 func (m *Manager) AddComment(ctx context.Context, entity string, entityID int64, content string) (*db.Comment, error) {
 	name, err := canonical("entity", entity, entityValues)
 	if err != nil {
@@ -82,8 +81,6 @@ func (m *Manager) AddComment(ctx context.Context, entity string, entityID int64,
 		return nil, ValidationError{Field: "content", Value: "longer than 4000 characters"}
 	}
 
-	// Checked before the insert so a missing entity comes back as "not found"
-	// rather than a foreign key violation the client cannot read.
 	exists, err := m.entityExists(ctx, name, entityID)
 	if err != nil {
 		return nil, err
@@ -108,12 +105,6 @@ func (m *Manager) AddComment(ctx context.Context, entity string, entityID int64,
 	return m.repo.AddComment(ctx, comment)
 }
 
-// LikeComment bumps the like counter and returns the new value. Returns nil when
-// there is no visible comment with that id.
-//
-// Deliberately not idempotent: who liked what is not stored, so a client can
-// like the same comment twice. That was the accepted trade for keeping the
-// comments anonymous.
 func (m *Manager) LikeComment(ctx context.Context, id int64) (*int64, error) {
 	return m.repo.IncCommentLikes(ctx, id)
 }

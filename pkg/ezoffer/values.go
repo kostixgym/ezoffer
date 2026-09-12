@@ -17,9 +17,7 @@ func (e ValidationError) Error() string {
 	return fmt.Sprintf("invalid %s: %q", e.Field, e.Value)
 }
 
-// The dictionaries below mirror the CHECK constraints in docs/ezoffer.sql. Keys
-// are lowercased so a client may send "Lead" or "liveCoding" in any casing;
-// values are the exact spelling stored in the column.
+
 var (
 	gradeValues = canonicalMap("junior", "middle", "senior", "lead")
 
@@ -45,7 +43,7 @@ func strValue(v *string) string {
 	return strings.TrimSpace(*v)
 }
 
-// canonical maps one filter value onto its stored spelling.
+
 func canonical(field, value string, known map[string]string) (string, error) {
 	v, ok := known[strings.ToLower(strings.TrimSpace(value))]
 	if !ok {
@@ -55,8 +53,6 @@ func canonical(field, value string, known map[string]string) (string, error) {
 	return v, nil
 }
 
-// canonicalAll maps a whole filter list. Blanks are skipped, anything unknown is
-// an error.
 func canonicalAll(field string, values []string, known map[string]string) ([]string, error) {
 	out := make([]string, 0, len(values))
 	for _, v := range values {
