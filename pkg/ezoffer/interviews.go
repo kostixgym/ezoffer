@@ -16,13 +16,6 @@ type InterviewListParams struct {
 	PageSize  int
 }
 
-// Interviews returns a page of interview recordings and the total count, newest
-// published first.
-//
-// 83 of the 180 records carry neither grade nor type — those are the public ones
-// scraped without that metadata. They show up in an unfiltered list and drop out
-// as soon as a grade or type filter is set, because an empty array intersects
-// nothing.
 func (m *Manager) Interviews(ctx context.Context, p InterviewListParams) ([]db.Interview, int, error) {
 	visible := true
 	search := &db.InterviewSearch{IsVisible: &visible}
@@ -57,8 +50,6 @@ func (m *Manager) Interviews(ctx context.Context, p InterviewListParams) ([]db.I
 		search.IsReal = p.IsReal
 	}
 
-	// publishedDate is null on a good third of the rows, so id carries the order
-	// there. Without it the page boundary is undefined and rows drift.
 	listOps := []db.OpFunc{
 		m.repo.FullInterview(),
 		db.WithSort(
@@ -80,7 +71,6 @@ func (m *Manager) Interviews(ctx context.Context, p InterviewListParams) ([]db.I
 	return interviews, count, nil
 }
 
-// Interview returns interview by id. Returns nil when it is not found or hidden.
 func (m *Manager) Interview(ctx context.Context, id int64) (*db.Interview, error) {
 	interview, err := m.repo.InterviewByID(ctx, id, m.repo.FullInterview())
 	if err != nil {
