@@ -31,7 +31,7 @@ type TestAssignment struct {
 	Companies     []Company  `json:"companies"`
 	Skills        []Skill    `json:"skills"`
 	Content       string     `json:"content"`
-	SourceUrl     *string    `json:"sourceUrl"`
+	SourceURL     *string    `json:"sourceUrl"`
 	PublishedDate *time.Time `json:"publishedDate"`
 }
 
@@ -62,7 +62,7 @@ func NewTestAssignment(in ezoffer.TestAssignmentItem) TestAssignment {
 		Companies:     NewCompanies(in.Companies),
 		Skills:        NewSkills(in.Skills),
 		Content:       in.TestAssignment.Content,
-		SourceUrl:     in.TestAssignment.SourceUrl,
+		SourceURL:     in.TestAssignment.SourceUrl,
 		PublishedDate: in.TestAssignment.PublishedDate,
 	}
 }
