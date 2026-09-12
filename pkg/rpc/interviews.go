@@ -23,7 +23,7 @@ const (
 // client never has to work out which of them is set.
 type Video struct {
 	Kind       string `json:"kind"`
-	Url        string `json:"url"`
+	URL        string `json:"url"`
 	Embeddable bool   `json:"embeddable"`
 }
 
@@ -51,11 +51,11 @@ type InterviewList struct {
 func NewVideo(in db.Interview) *Video {
 	switch {
 	case in.YoutubeUrl != nil && *in.YoutubeUrl != "":
-		return &Video{Kind: VideoKindYoutube, Url: *in.YoutubeUrl, Embeddable: in.IsEmbeddable}
+		return &Video{Kind: VideoKindYoutube, URL: *in.YoutubeUrl, Embeddable: in.IsEmbeddable}
 	case in.VfsPath != nil && *in.VfsPath != "":
-		return &Video{Kind: VideoKindVfs, Url: *in.VfsPath, Embeddable: in.IsEmbeddable}
+		return &Video{Kind: VideoKindVfs, URL: *in.VfsPath, Embeddable: in.IsEmbeddable}
 	case in.SourceUrl != nil && *in.SourceUrl != "":
-		return &Video{Kind: VideoKindExternal, Url: *in.SourceUrl, Embeddable: false}
+		return &Video{Kind: VideoKindExternal, URL: *in.SourceUrl, Embeddable: false}
 	}
 
 	return nil
