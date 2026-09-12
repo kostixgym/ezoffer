@@ -65,7 +65,6 @@ func (m *Manager) Comments(ctx context.Context, p CommentListParams) ([]db.Comme
 	return comments, count, nil
 }
 
-
 func (m *Manager) AddComment(ctx context.Context, entity string, entityID int64, content string) (*db.Comment, error) {
 	name, err := canonical("entity", entity, entityValues)
 	if err != nil {

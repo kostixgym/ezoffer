@@ -16,7 +16,6 @@ type InterviewListParams struct {
 	PageSize  int
 }
 
-
 func (m *Manager) Interviews(ctx context.Context, p InterviewListParams) ([]db.Interview, int, error) {
 	visible := true
 	search := &db.InterviewSearch{IsVisible: &visible}

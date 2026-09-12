@@ -20,7 +20,6 @@ type TaskItem struct {
 	Companies []db.Company
 }
 
-
 func (m *Manager) Tasks(ctx context.Context, p TaskListParams) ([]TaskItem, int, error) {
 	search := &db.TaskSearch{}
 	if text := strValue(p.Search); text != "" {

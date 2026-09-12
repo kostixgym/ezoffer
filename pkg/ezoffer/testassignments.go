@@ -15,13 +15,11 @@ type TestAssignmentListParams struct {
 	PageSize  int
 }
 
-
 type TestAssignmentItem struct {
 	TestAssignment db.TestAssignment
 	Companies      []db.Company
 	Skills         []db.Skill
 }
-
 
 func (m *Manager) TestAssignments(ctx context.Context, p TestAssignmentListParams) ([]TestAssignmentItem, int, error) {
 	search := &db.TestAssignmentSearch{}
@@ -72,7 +70,6 @@ func (m *Manager) TestAssignments(ctx context.Context, p TestAssignmentListParam
 	return items, count, nil
 }
 
-
 func (m *Manager) TestAssignment(ctx context.Context, id int64) (*TestAssignmentItem, error) {
 	assignment, err := m.repo.TestAssignmentByID(ctx, id)
 	if err != nil {
@@ -90,7 +87,6 @@ func (m *Manager) TestAssignment(ctx context.Context, id int64) (*TestAssignment
 
 	return &items[0], nil
 }
-
 
 func (m *Manager) testAssignmentItems(ctx context.Context, assignments []db.TestAssignment) ([]TestAssignmentItem, error) {
 	ids := make([]int64, 0, len(assignments))

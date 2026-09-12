@@ -17,7 +17,6 @@ func (e ValidationError) Error() string {
 	return fmt.Sprintf("invalid %s: %q", e.Field, e.Value)
 }
 
-
 var (
 	gradeValues = canonicalMap("junior", "middle", "senior", "lead")
 
@@ -42,7 +41,6 @@ func strValue(v *string) string {
 
 	return strings.TrimSpace(*v)
 }
-
 
 func canonical(field, value string, known map[string]string) (string, error) {
 	v, ok := known[strings.ToLower(strings.TrimSpace(value))]
