@@ -39,9 +39,9 @@ func (m *Manager) Tasks(ctx context.Context, p TaskListParams) ([]TaskItem, int,
 	}
 
 	if raw := strValue(p.Type); raw != "" {
-		t, err := canonical("type", raw, taskTypeValues)
-		if err != nil {
-			return nil, 0, err
+		t, cerr := canonical("type", raw, taskTypeValues)
+		if cerr != nil {
+			return nil, 0, cerr
 		}
 
 		search.Type = &t

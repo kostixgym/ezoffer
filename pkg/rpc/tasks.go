@@ -31,7 +31,7 @@ type Task struct {
 	Type      *string    `json:"type"`
 	Companies []Company  `json:"companies"`
 	Content   string     `json:"content"`
-	SourceUrl *string    `json:"sourceUrl"`
+	SourceURL *string    `json:"sourceUrl"`
 	LastDate  *time.Time `json:"lastDate"`
 }
 
@@ -62,7 +62,7 @@ func NewTask(in ezoffer.TaskItem) Task {
 		Type:      in.Task.Type,
 		Companies: NewCompanies(in.Companies),
 		Content:   in.Task.Content,
-		SourceUrl: in.Task.SourceUrl,
+		SourceURL: in.Task.SourceUrl,
 		LastDate:  in.Task.LastDate,
 	}
 }
