@@ -11,9 +11,15 @@ import (
 )
 
 var RPC = struct {
-	QuestionService struct{ List, Get string }
-	TaskService     struct{ List, Get string }
+	DictionaryService     struct{ Companies, Skills string }
+	QuestionService       struct{ List, Get string }
+	TaskService           struct{ List, Get string }
+	TestAssignmentService struct{ List, Get string }
 }{
+	DictionaryService: struct{ Companies, Skills string }{
+		Companies: "companies",
+		Skills:    "skills",
+	},
 	QuestionService: struct{ List, Get string }{
 		List: "list",
 		Get:  "get",
@@ -22,6 +28,95 @@ var RPC = struct {
 		List: "list",
 		Get:  "get",
 	},
+	TestAssignmentService: struct{ List, Get string }{
+		List: "list",
+		Get:  "get",
+	},
+}
+
+func (DictionaryService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"Companies": {
+				Description: `Companies returns every company, ordered by name.`,
+				Parameters:  []smd.JSONSchema{},
+				Returns: smd.JSONSchema{
+					Description: `companies`,
+					Type:        smd.Array,
+					TypeName:    "[]Company",
+					Items: map[string]string{
+						"$ref": "#/definitions/Company",
+					},
+					Definitions: map[string]smd.Definition{
+						"Company": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "internal error",
+				},
+			},
+			"Skills": {
+				Description: `Skills returns every skill, ordered by name.`,
+				Parameters:  []smd.JSONSchema{},
+				Returns: smd.JSONSchema{
+					Description: `skills`,
+					Type:        smd.Array,
+					TypeName:    "[]Skill",
+					Items: map[string]string{
+						"$ref": "#/definitions/Skill",
+					},
+					Definitions: map[string]smd.Definition{
+						"Skill": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					500: "internal error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s DictionaryService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+
+	switch method {
+	case RPC.DictionaryService.Companies:
+		resp.Set(s.Companies(ctx))
+
+	case RPC.DictionaryService.Skills:
+		resp.Set(s.Skills(ctx))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
 }
 
 func (QuestionService) SMD() smd.ServiceInfo {
@@ -489,6 +584,323 @@ func (s TaskService) Invoke(ctx context.Context, method string, params json.RawM
 		resp.Set(s.List(ctx, *args.Page, *args.PageSize, args.Search, args.Grades, args.TaskType, args.CompanyID))
 
 	case RPC.TaskService.Get:
+		var args = struct {
+			Id int64 `json:"id"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"id"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		resp.Set(s.Get(ctx, args.Id))
+
+	default:
+		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)
+	}
+
+	return resp
+}
+
+func (TestAssignmentService) SMD() smd.ServiceInfo {
+	return smd.ServiceInfo{
+		Methods: map[string]smd.Service{
+			"List": {
+				Description: `List returns a page of test assignments, newest published first.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "page",
+						Optional:    true,
+						Description: `page number, starts at 1`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "pageSize",
+						Optional:    true,
+						Description: `items per page, capped at 100`,
+						Type:        smd.Integer,
+					},
+					{
+						Name:        "search",
+						Optional:    true,
+						Description: `substring to search in title`,
+						Type:        smd.String,
+					},
+					{
+						Name:        "grades",
+						Description: `filter by grades: junior, middle, senior, lead`,
+						Type:        smd.Array,
+						TypeName:    "[]",
+						Items: map[string]string{
+							"type": smd.String,
+						},
+					},
+					{
+						Name:        "skillIDs",
+						Description: `keep assignments requiring at least one of these skills`,
+						Type:        smd.Array,
+						TypeName:    "[]",
+						Items: map[string]string{
+							"type": smd.Integer,
+						},
+					},
+					{
+						Name:        "companyID",
+						Optional:    true,
+						Description: `filter by company`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `test assignments page with total count`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "TestAssignmentList",
+					Properties: smd.PropertyList{
+						{
+							Name: "items",
+							Type: smd.Array,
+							Items: map[string]string{
+								"$ref": "#/definitions/TestAssignmentSummary",
+							},
+						},
+						{
+							Name: "totalCount",
+							Type: smd.Integer,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"TestAssignmentSummary": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "slug",
+									Type: smd.String,
+								},
+								{
+									Name: "title",
+									Type: smd.String,
+								},
+								{
+									Name: "grades",
+									Type: smd.Array,
+									Items: map[string]string{
+										"type": smd.String,
+									},
+								},
+								{
+									Name: "companies",
+									Type: smd.Array,
+									Items: map[string]string{
+										"$ref": "#/definitions/Company",
+									},
+								},
+								{
+									Name: "skills",
+									Type: smd.Array,
+									Items: map[string]string{
+										"$ref": "#/definitions/Skill",
+									},
+								},
+								{
+									Name: "excerpt",
+									Type: smd.String,
+								},
+								{
+									Name:     "publishedDate",
+									Optional: true,
+									Type:     smd.String,
+								},
+							},
+						},
+						"Company": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+						"Skill": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					400: "unknown grade",
+					500: "internal error",
+				},
+			},
+			"Get": {
+				Description: `Get returns a single test assignment by id.`,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "id",
+						Description: `test assignment id`,
+						Type:        smd.Integer,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: `test assignment`,
+					Optional:    true,
+					Type:        smd.Object,
+					TypeName:    "TestAssignment",
+					Properties: smd.PropertyList{
+						{
+							Name: "id",
+							Type: smd.Integer,
+						},
+						{
+							Name: "slug",
+							Type: smd.String,
+						},
+						{
+							Name: "title",
+							Type: smd.String,
+						},
+						{
+							Name: "grades",
+							Type: smd.Array,
+							Items: map[string]string{
+								"type": smd.String,
+							},
+						},
+						{
+							Name: "companies",
+							Type: smd.Array,
+							Items: map[string]string{
+								"$ref": "#/definitions/Company",
+							},
+						},
+						{
+							Name: "skills",
+							Type: smd.Array,
+							Items: map[string]string{
+								"$ref": "#/definitions/Skill",
+							},
+						},
+						{
+							Name: "content",
+							Type: smd.String,
+						},
+						{
+							Name:     "sourceUrl",
+							Optional: true,
+							Type:     smd.String,
+						},
+						{
+							Name:     "publishedDate",
+							Optional: true,
+							Type:     smd.String,
+						},
+					},
+					Definitions: map[string]smd.Definition{
+						"Company": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+						"Skill": {
+							Type: "object",
+							Properties: smd.PropertyList{
+								{
+									Name: "id",
+									Type: smd.Integer,
+								},
+								{
+									Name: "name",
+									Type: smd.String,
+								},
+							},
+						},
+					},
+				},
+				Errors: map[int]string{
+					404: "test assignment not found",
+					500: "internal error",
+				},
+			},
+		},
+	}
+}
+
+// Invoke is as generated code from zenrpc cmd
+func (s TestAssignmentService) Invoke(ctx context.Context, method string, params json.RawMessage) zenrpc.Response {
+	resp := zenrpc.Response{}
+	var err error
+
+	switch method {
+	case RPC.TestAssignmentService.List:
+		var args = struct {
+			Page      *int     `json:"page"`
+			PageSize  *int     `json:"pageSize"`
+			Search    *string  `json:"search"`
+			Grades    []string `json:"grades"`
+			SkillIDs  []int64  `json:"skillIDs"`
+			CompanyID *int64   `json:"companyID"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"page", "pageSize", "search", "grades", "skillIDs", "companyID"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		//zenrpc:page=1 page number, starts at 1
+		if args.Page == nil {
+			var v int = 1
+			args.Page = &v
+		}
+
+		//zenrpc:pageSize=25 items per page, capped at 100
+		if args.PageSize == nil {
+			var v int = 25
+			args.PageSize = &v
+		}
+
+		resp.Set(s.List(ctx, *args.Page, *args.PageSize, args.Search, args.Grades, args.SkillIDs, args.CompanyID))
+
+	case RPC.TestAssignmentService.Get:
 		var args = struct {
 			Id int64 `json:"id"`
 		}{}

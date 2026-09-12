@@ -51,8 +51,10 @@ func New(dbo db.DB, logger embedlog.Logger, isDevel bool) *zenrpc.Server {
 
 	// services
 	rpc.RegisterAll(map[string]zenrpc.Invoker{
-		"question": NewQuestionService(m, logger),
-		"task":     NewTaskService(m, logger),
+		"question":       NewQuestionService(m, logger),
+		"task":           NewTaskService(m, logger),
+		"testAssignment": NewTestAssignmentService(m, logger),
+		"dictionary":     NewDictionaryService(m, logger),
 	})
 
 	return rpc

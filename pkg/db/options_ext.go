@@ -1,6 +1,7 @@
 package db
 
 import (
+	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 )
 
@@ -29,6 +30,32 @@ func WithTaskCompanyID(companyID int64) OpFunc {
 		query.Where(
 			`"t"."taskId" IN (SELECT "taskId" FROM "tasksCompanies" WHERE "companyId" = ?)`,
 			companyID,
+		)
+	}
+}
+
+// WithTestAssignmentCompanyID filters a testAssignments query by company. Bound
+// to that query: the condition is written against the "t" alias of
+// testAssignments.
+//
+// A semi-join for the same reason as above — CountTestAssignments runs without
+// any join.
+func WithTestAssignmentCompanyID(companyID int64) OpFunc {
+	return func(query *orm.Query) {
+		query.Where(
+			`"t"."testAssignmentId" IN (SELECT "testAssignmentId" FROM "testAssignmentsCompanies" WHERE "companyId" = ?)`,
+			companyID,
+		)
+	}
+}
+
+// WithTestAssignmentSkillIDs keeps testAssignments that require at least one of
+// the given skills. Bound to the testAssignments query.
+func WithTestAssignmentSkillIDs(skillIDs []int64) OpFunc {
+	return func(query *orm.Query) {
+		query.Where(
+			`"t"."testAssignmentId" IN (SELECT "testAssignmentId" FROM "testAssignmentsSkills" WHERE "skillId" IN (?))`,
+			pg.In(skillIDs),
 		)
 	}
 }

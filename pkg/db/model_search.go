@@ -579,18 +579,19 @@ func (tcs *TasksCompanySearch) Q() applier {
 type TestAssignmentSearch struct {
 	search
 
-	ID             *int64
-	Slug           *string
-	Title          *string
-	Content        *string
-	SourceUrl      *string
-	PublishedDate  *time.Time
-	CreatedAt      *time.Time
-	IDs            []int64
-	SlugILike      *string
-	TitleILike     *string
-	ContentILike   *string
-	SourceUrlILike *string
+	ID              *int64
+	Slug            *string
+	Title           *string
+	Content         *string
+	SourceUrl       *string
+	PublishedDate   *time.Time
+	CreatedAt       *time.Time
+	IDs             []int64
+	SlugILike       *string
+	TitleILike      *string
+	ContentILike    *string
+	SourceUrlILike  *string
+	GradesIntersect []string
 }
 
 func (tas *TestAssignmentSearch) Apply(query *orm.Query) *orm.Query {
@@ -632,6 +633,9 @@ func (tas *TestAssignmentSearch) Apply(query *orm.Query) *orm.Query {
 	}
 	if tas.SourceUrlILike != nil {
 		Filter{Columns.TestAssignment.SourceUrl, *tas.SourceUrlILike, SearchTypeILike, false}.Apply(query)
+	}
+	if len(tas.GradesIntersect) > 0 {
+		Filter{Columns.TestAssignment.Grades, tas.GradesIntersect, SearchTypeArrayIntersect, false}.Apply(query)
 	}
 
 	tas.apply(query)
